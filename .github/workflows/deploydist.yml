@@ -32,3 +32,26 @@ jobs :
                     echo "Running tests"
                     npm test
                     echo "Tests completed"
+
+    deploy :
+        runs-on : ubuntu-latest
+        steps : 
+            - name : Get Code
+              uses : actions/checkout@v2
+
+            - name : Install Node
+              uses : actions/setup-node@v2
+              with : 
+                    node-version : '20'
+
+            - name : Install Dependencies
+              run : |
+                    echo "Installing dependencies"
+                    npm ci
+                    echo "Dependencies installed"
+            - name : Build
+              run : npm run build
+
+            - name : Deploy
+              run : echo "Deployed successfully"
+        
