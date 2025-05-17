@@ -1,0 +1,94 @@
+name : Deploying to github pages
+on : 
+    push :
+        branches : 
+            - main
+            - feature/*
+        paths-ignore :
+            - '.github/workflows/*'
+            - README.md
+    workflow_dispatch : 
+jobs : 
+    test :
+        runs-on : ubuntu-latest
+        steps : 
+            - name : Get Code
+              uses : actions/checkout@v2
+
+            - name : Install Node
+              uses : actions/setup-node@v2
+              with : 
+                node-version : '20'
+
+            - name : cache 
+              uses : actions/cache@v4
+              with : 
+                    path : ~/.npm
+                    key : ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+            - name : Install Dependencies
+              run : |
+                    echo "Installing dependencies"
+                    npm ci
+                    echo "Dependencies installed"
+
+            - name : Checking Tests
+              run : |
+                    echo "Running tests"
+                    npm test
+                    echo "Tests completed"
+
+    build: 
+        needs : test
+        runs-on : ubuntu-latest
+        steps :
+
+            - name : Get Code
+              uses : actions/checkout@v2
+
+            - name : Install Node
+              uses : actions/setup-node@v2
+              with : 
+                    node-version : '20'       
+
+                 
+            - name : cache 
+              uses : actions/cache@v4
+              with : 
+                    path : ~/.npm
+                    key : ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+            - name : Install Dependencies
+              run : |
+                    echo "Installing dependencies"
+                    npm ci
+                    echo "Dependencies installed"
+
+            - name : Build
+              run : npm run build
+
+            - name : Upload dist Artifact
+              uses : actions/upload-pages-artifact@v3
+              with : 
+                    name : github-pages
+                    path : dist
+
+
+    deploy :
+        needs: build
+        runs-on: ubuntu-latest   
+        permissions :
+          pages: write      # to deploy to Pages
+          id-token: write   # to verify the deployment originates from an appropriate source
+
+        environment :
+          name: github-pages
+          url: ${{ steps.deployment.outputs.page_url }}
+
+        steps:
+          - name: Deploy to GitHub Pages
+            id: deployment
+            uses: actions/deploy-pages@v4
+            with :
+                token : ${{ secrets.GITHUB_TOKEN }}
+        
+        
