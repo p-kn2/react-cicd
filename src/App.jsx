@@ -5,7 +5,7 @@ function App() {
   return (
     <>
       <h1>Github Actions</h1>
-      <h2>Complete course with 3 projects</h2>
+      <h5>Completed the course while starting in 1 day</h5>
     </>
   )
 }
